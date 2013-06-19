@@ -1,0 +1,7 @@
+Game of Fifteen
+===============
+
+For an explanation of the problem, see: http://en.wikipedia.org/wiki/15_puzzle
+
+The board size is set to 3 to reduce problem complexity.
+The algorithm works with any board size, but a bigger heap will be needed to avoid stack overflow.
