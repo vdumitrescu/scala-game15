@@ -24,26 +24,26 @@ class Game(start: Vector[Vector[Int]]) {
   ).toMap updated ((size-1, size-1), 0) 
   
   trait Move
-  case class North extends Move
-  case class South extends Move
-  case class East  extends Move
-  case class West  extends Move
+  object North extends Move
+  object South extends Move
+  object East  extends Move
+  object West  extends Move
 
-  val moves = List(North(), South(), East(), West())
+  val moves = List(North, South, East, West)
   
   class Position(val row: Int, val col: Int) {
     
     def next(move: Move): Position = move match {
-      case South() =>
+      case South =>
         if (row > 0) new Position(row - 1, col)
         else null
-      case North() =>
+      case North =>
         if (row < size - 1) new Position(row + 1, col)
         else null
-      case East() =>
+      case East =>
         if (col > 0) new Position(row, col - 1)
         else null
-      case West() =>
+      case West =>
         if (col < size - 1) new Position(row, col + 1)
         else null
     } 
@@ -77,14 +77,14 @@ class Game(start: Vector[Vector[Int]]) {
   
   val initialHole = new Position(holePosition._1, holePosition._2)
   val initialState = new State(initialBoard, initialHole, List())
-  
+
   def generate(toAnalyze: Set[State], analyzed: Set[State]): Stream[Set[State]] = {
     if (toAnalyze.isEmpty) Stream.empty
     else {
       val children = for {
         state <- toAnalyze
         next <- state.nextStates
-        if (!analyzed.contains(next))
+        if !analyzed.contains(next)
       } yield next
       toAnalyze #:: generate(children, analyzed ++ children)
     }
