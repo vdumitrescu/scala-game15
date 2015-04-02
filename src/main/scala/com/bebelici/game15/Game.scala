@@ -1,10 +1,10 @@
 package com.bebelici.game15
 
-class Game(start: Vector[Vector[Int]]) {
+case class Game(start: Vector[Vector[Int]]) {
 
   val size = start.length
   type Board = Map[(Int, Int), Int]
-  
+
   val initialBoard = (for {
     row <- 0 until size
     col <- 0 until size
@@ -20,53 +20,39 @@ class Game(start: Vector[Vector[Int]]) {
   val solutionBoard = ( for {
     row <- 0 until size
     col <- 0 until size    
-  } yield (row, col) -> (row * 3 + col + 1)
-  ).toMap updated ((size-1, size-1), 0) 
-  
+  } yield (row, col) -> (row * size + col + 1)
+  ).toMap updated ((size-1, size-1), 0)
+
   trait Move
-  object North extends Move
-  object South extends Move
-  object East  extends Move
-  object West  extends Move
+  case object North extends Move
+  case object South extends Move
+  case object East  extends Move
+  case object West  extends Move
 
   val moves = List(North, South, East, West)
   
-  class Position(val row: Int, val col: Int) {
+  case class Position(row: Int, col: Int) {
     
-    def next(move: Move): Position = move match {
-      case South =>
-        if (row > 0) new Position(row - 1, col)
-        else null
-      case North =>
-        if (row < size - 1) new Position(row + 1, col)
-        else null
-      case East =>
-        if (col > 0) new Position(row, col - 1)
-        else null
-      case West =>
-        if (col < size - 1) new Position(row, col + 1)
-        else null
+    def next(move: Move): Option[Position] = move match {
+      case South if row > 0         => Some(Position(row - 1, col))
+      case North if row < size - 1  => Some(Position(row + 1, col))
+      case East  if col > 0         => Some(Position(row, col - 1))
+      case West  if col < size - 1  => Some(Position(row, col + 1))
+      case _ => None
     } 
   }
-  
 
-  class State(val board: Board, hole: Position, val history: List[Move]) {
+  case class State(board: Board, hole: Position, history: List[Move]) {
     
-    def next(move: Move): State = {
-      val newHole = hole.next(move)
-      if (newHole == null) null
-      else {
+    def next(move: Move): Option[State] = {
+      hole.next(move) map { newHole =>
         val piece = board((newHole.row, newHole.col))
         val newBoard = board updated ((newHole.row, newHole.col), 0) updated ((hole.row, hole.col), piece)
-        new State(newBoard, newHole, move::history)
+        State(newBoard, newHole, move::history)
       }
     }
     
-    def nextStates: Set[State] = (for {
-      m <- moves
-      if this.next(m) != null
-    } yield this.next(m)
-    ).toSet
+    def nextStates: Set[State] = (moves flatMap next).toSet
     
     override def toString = ( for {
       r <- 0 until size
@@ -96,5 +82,5 @@ class Game(start: Vector[Vector[Int]]) {
     stateSet <- stateSets
     state <- stateSet
     if state.board.equals(solutionBoard)
-  } yield state.history
+  } yield state.history.reverse
 }
