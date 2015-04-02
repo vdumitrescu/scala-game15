@@ -1,0 +1,4 @@
+site_name: Fifteen Puzzle
+repo_url: https://github.com/vdumitrescu/scala-game15
+pages:
+- ['index.md', 'Introduction']
